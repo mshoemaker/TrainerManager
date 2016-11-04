@@ -1,0 +1,8 @@
+﻿<?xml version="1.0"?>
+<TrainerManager>
+  <Trainer1>
+    <PC ipAddress="141.141.207.201" status="1"/>
+    <PC ipAddress="141.141.207.210" status="1"/>
+    <PC ipAddress="141.141.207.225" status="1"/>
+  </Trainer1>
+</TrainerManager>
