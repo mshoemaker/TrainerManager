@@ -38,21 +38,23 @@
             this.exitToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.listView1 = new System.Windows.Forms.ListView();
             this.imageList1 = new System.Windows.Forms.ImageList(this.components);
+            this.tmrStartupDelay = new System.Windows.Forms.Timer(this.components);
             this.contextMenuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
             // tmrSendManagerHeartbeat
             // 
-            this.tmrSendManagerHeartbeat.Enabled = true;
             this.tmrSendManagerHeartbeat.Interval = 5000;
             this.tmrSendManagerHeartbeat.Tick += new System.EventHandler(this.tmrSendManagerHeartbeat_Tick);
             // 
             // tmrReceiveManagerHeartbeat
             // 
+            this.tmrReceiveManagerHeartbeat.Interval = 5000;
             this.tmrReceiveManagerHeartbeat.Tick += new System.EventHandler(this.tmrReceiveManagerHeartbeat_Tick);
             // 
             // tmrReceiveClientHeartbeat
             // 
+            this.tmrReceiveClientHeartbeat.Interval = 5000;
             this.tmrReceiveClientHeartbeat.Tick += new System.EventHandler(this.tmrReceiveClientHeartbeat_Tick);
             // 
             // notifyIcon1
@@ -87,7 +89,7 @@
             this.listView1.GridLines = true;
             this.listView1.LargeImageList = this.imageList1;
             this.listView1.Location = new System.Drawing.Point(0, 0);
-            this.listView1.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.listView1.Margin = new System.Windows.Forms.Padding(4);
             this.listView1.Name = "listView1";
             this.listView1.Size = new System.Drawing.Size(664, 212);
             this.listView1.SmallImageList = this.imageList1;
@@ -103,6 +105,12 @@
             this.imageList1.Images.SetKeyName(0, "green.bmp");
             this.imageList1.Images.SetKeyName(1, "red.bmp");
             // 
+            // tmrStartupDelay
+            // 
+            this.tmrStartupDelay.Enabled = true;
+            this.tmrStartupDelay.Interval = 10000;
+            this.tmrStartupDelay.Tick += new System.EventHandler(this.tmrStartupDelay_Tick);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
@@ -110,7 +118,7 @@
             this.ClientSize = new System.Drawing.Size(664, 522);
             this.Controls.Add(this.listView1);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
-            this.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.Margin = new System.Windows.Forms.Padding(4);
             this.MaximizeBox = false;
             this.Name = "Form1";
             this.Text = "TrainerManager";
@@ -132,6 +140,7 @@
         private System.Windows.Forms.ToolStripMenuItem exitToolStripMenuItem;
         private System.Windows.Forms.ListView listView1;
         private System.Windows.Forms.ImageList imageList1;
+        private System.Windows.Forms.Timer tmrStartupDelay;
     }
 }
 
