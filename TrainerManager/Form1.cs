@@ -25,12 +25,15 @@ namespace TrainerManager
 
         List<ListViewItem> machines = new List<ListViewItem>();
 
-        IPAddress _multicastIp;
-        int _port;
-
         public Form1()
         {
             InitializeComponent();
+
+            // grab the GBL network IP
+            // we know it is like 130.39.9x.3y
+            // where x is site?
+            // where y is trainer number
+
         }
 
         private void outputFile()
@@ -89,6 +92,18 @@ namespace TrainerManager
             listView1.Columns.Add("Trainer #", colWidth);
             listView1.Columns.Add("IP Addres", colWidth);
 
+            // on first run we should check for a firstRun key in app.config
+            // if true then we grab our GBL IP address.
+            // with that we know the last digit is trainer number
+            // then we send firstRun in app.config to false, or delete it all together.
+            if (ConfigurationManager.AppSettings["firstRun"].Equals("true"))
+            {
+                Configuration config = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
+                config.AppSettings.Settings["firstRun"].Value = "false";
+                config.Save(ConfigurationSaveMode.Modified);
+                ConfigurationManager.RefreshSection("appSettings");
+            }
+
             // read machine list from file, local machines only?  Entire map?
             readFile();
 
@@ -103,18 +118,30 @@ namespace TrainerManager
 
         private void tmrReceiveClientHeartbeat_Tick(object sender, EventArgs e)
         {
-            // check network for client heartbeats
-
+            // check network for client heartbeats.
+            // connect a udpclient object to clientMulticastPort on clientMulticastGrp.
+            // check for a message.
+            // should contain just an ip address, if message received then the machine is alive.
+            // we then add it to the machineList List of ListViewItems if it isn't already there.
+            // do we even care what the message is?
+            // if we can get the sender's IP from the message then we have what we need.
+            // I believe we might need to join the multicast group on each of the available networks.
         }
 
         private void tmrReceiveManagerHeartbeat_Tick(object sender, EventArgs e)
         {
             // check network for manager heartbeats
-
+            // only need to check for this one on the GBL network
+            // should the message contain only local trainer info, or all machines known about?
+            // I would lean toward all, but that increases the data sent over the network.
+            // if each trainer sends its local machineList the data will be small.
+            // should then only record the local machine list to file.
+            // local machines should be placed first in the listView.
         }
 
         private void tmrSendManagerHeartbeat_Tick(object sender, EventArgs e)
         {
+
             //// send manager heartbeat
             //foreach (IPAddress localIp in Dns.GetHostAddresses(Dns.GetHostName()).Where(i => i.AddressFamily == AddressFamily.InterNetwork))
             //{
