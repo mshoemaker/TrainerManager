@@ -14,15 +14,19 @@ namespace TrainerManager
 {
     public partial class Form1 : Form
     {
-        string machineListFile = ConfigurationManager.AppSettings["machineList"];
+        private string machineListFile = ConfigurationManager.AppSettings["machineList"];
 
-        IPAddress managerMulticastGrp = IPAddress.Parse(ConfigurationManager.AppSettings["managerMulticastGrp"]);
-        int managerMulticastPort = System.Convert.ToInt16(ConfigurationManager.AppSettings["managerMulticastPort"]);
-        IPAddress clientMulticastGrp = IPAddress.Parse(ConfigurationManager.AppSettings["clientMulticastGrp"]);
-        int clientMulticastPort = System.Convert.ToInt16(ConfigurationManager.AppSettings["clientMulticastPort"]);
-
+        private IPAddress managerMulticastGrp = IPAddress.Parse(ConfigurationManager.AppSettings["managerMulticastGrp"]);
+        private int managerMulticastPort = System.Convert.ToInt16(ConfigurationManager.AppSettings["managerMulticastPort"]);
+        private IPAddress clientMulticastGrp = IPAddress.Parse(ConfigurationManager.AppSettings["clientMulticastGrp"]);
+        private int clientMulticastPort = System.Convert.ToInt16(ConfigurationManager.AppSettings["clientMulticastPort"]);
+        private UdpClient m_Client;
+        private IPEndPoint m_ClientEndpoint;
+            
         List<ListViewItem> machines = new List<ListViewItem>();
 
+        bool multicastConnected;
+                
         public Form1()
         {
             InitializeComponent();
@@ -108,10 +112,29 @@ namespace TrainerManager
             // display table of machines read from the file, marked as RED until they respond
 
             // start timer that will listen for client heartbeats
+            multicastConnected = ConnectToClientMulticastGrp();
 
             // start timer that will listen for manager heartbeats
 
             // start timer that will send manager heartbeats
+        }
+
+        private bool ConnectToClientMulticastGrp()
+        {
+            try
+            {
+                m_Client = new UdpClient(clientMulticastPort, AddressFamily.InterNetwork);
+                m_Client.JoinMulticastGroup(clientMulticastGrp);
+
+                return true;
+            }
+            catch(Exception e)
+            {
+                MessageBox.Show("Error connecting to multicast group: " + e.ToString());
+
+                return false;
+            }
+
         }
 
         private void tmrReceiveClientHeartbeat_Tick(object sender, EventArgs e)
@@ -124,6 +147,14 @@ namespace TrainerManager
             // do we even care what the message is?
             // if we can get the sender's IP from the message then we have what we need.
             // I believe we might need to join the multicast group on each of the available networks.
+            if(multicastConnected)
+            {
+                if(m_Client.Available > 0)
+                {
+                    string retVal = Receive.ReceiveUntilStop(m_Client);
+                    MessageBox.Show(retVal);
+                }
+            }
         }
 
         private void tmrReceiveManagerHeartbeat_Tick(object sender, EventArgs e)
@@ -211,6 +242,42 @@ namespace TrainerManager
             tmrSendManagerHeartbeat.Start();
 
             tmrStartupDelay.Stop();
+        }
+    }
+
+    public class Receive
+    {
+        public static string ReceiveUntilStop(UdpClient c)
+        {
+            string strData = "";
+            string ret = "";
+
+            ASCIIEncoding ASCII = new ASCIIEncoding();
+
+            IPEndPoint endpoint = new IPEndPoint(IPAddress.Any, 50);
+
+            Byte[] data = c.Receive(ref endpoint);
+            strData = ASCII.GetString(data);
+            ret += strData + "\n";
+
+            return ret;
+        }
+    }
+
+    public class Send
+    {
+        public static void SendData(UdpClient c, IPEndPoint ep, string data)
+        {
+            c.Send(GetBytesToArray(data.ToCharArray()), data.Length, ep);
+        }
+
+        private static Byte[] GetBytesToArray(Char[] ch)
+        {
+            Byte[] ret = new Byte[ch.Length];
+            for (int i = 0; i < ch.Length; i++)
+                ret[i] = (Byte)ch[i];
+
+            return ret;
         }
     }
 }
